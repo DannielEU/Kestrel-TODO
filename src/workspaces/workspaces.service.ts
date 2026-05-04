@@ -4,8 +4,6 @@ import * as schema from '../database/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from 'src/database/drizzle.provider';
 import { eq } from 'drizzle-orm';
-import { length } from 'class-validator';
-import { workspaces } from '../database/schema';
 
 type DB = NodePgDatabase<typeof schema>;
 

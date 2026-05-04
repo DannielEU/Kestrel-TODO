@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { LoginResponse, User } from './entities/user.model';
 import { StartUserInput } from './dto/start-user';
-import { Req, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { PasetoGuard } from 'src/auth/guard/paseto.guard';
 @Resolver(() => User)
 export class UsersResolver {

@@ -14,15 +14,22 @@ logger = new Logger(WorksService.name);
     @Inject(DRIZZLE) private db: DB
   ) {}
 
-  create(createWorkInput: CreateWorkInput) {
+  async create(createWorkInput: CreateWorkInput, userId: string) {
     this.logger.log(`Creating work with input: ${JSON.stringify(createWorkInput)}`);
     const { state, description, level, projectId } = createWorkInput;
-    return this.db.insert(schema.works).values({
+    const work = await this.db.insert(schema.works).values({
       state: state as (typeof schema.stateEnum.enumValues)[number],
       description,
       level: level as (typeof schema.levelEnum.enumValues)[number],
       projectId,
     }).returning();
+    // auto asignar tarea a el creador.
+    this.logger.log(`Work created with ID: ${work[0].id}, assigning to user ID: ${userId}`);
+    await this.db.insert(schema.workUsers).values({
+      userId,
+      workId: work[0].id,
+    });
+    return work[0];
   }
 
   findAll() {

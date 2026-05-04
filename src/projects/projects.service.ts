@@ -18,19 +18,18 @@ export class ProjectsService {
 
   async create(createProjectInput: CreateProjectInput, userId: string) {
     this.logger.log('Creating a new project');
-    const { name, description, workspaceId, createdAt, updatedAt } = createProjectInput;
+    const { name, description, workspaceId } = createProjectInput;
     // verificar que el usuario tenga acceso al workspace siendo admin
     
     if (!(await this.verifyUserAccess(workspaceId, userId))) {
       throw new Error('Unauthorized');  
     }
-    return await this.db.insert(schema.projects).values({
+    const project = await this.db.insert(schema.projects).values({
       name,
       description,
       workspaceId,
-      createdAt,
-      updatedAt,
     }).returning();
+    return project[0];
   }
 
   async verifyUserAccess(workspaceId: string, userId: string): Promise<boolean> {

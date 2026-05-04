@@ -108,9 +108,9 @@ input StartUserInput {
 }
 
 input CreateWorkInput {
-  state: WorkState!
+  state: WorkState! = PENDING
   description: String!
-  level: Level!
+  level: Level! = Low
   projectId: ID!
 }
 
@@ -122,6 +122,4 @@ input CreateProjectInput {
   name: String!
   description: String!
   workspaceId: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
 }

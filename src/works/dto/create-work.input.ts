@@ -4,11 +4,11 @@ import { Level } from 'src/public/enums/level.enum';
 
 @InputType()
 export class CreateWorkInput {
-  @Field(() => WorkState)
+  @Field(() => WorkState, { defaultValue: WorkState.PENDING })
   state: WorkState;
   @Field(() => String)
   description: string;
-  @Field(() => Level)
+  @Field(() => Level, { defaultValue: Level.Low })
   level: Level;
   @Field(() => ID)
   projectId:string
