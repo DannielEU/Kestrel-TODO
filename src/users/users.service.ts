@@ -33,6 +33,7 @@ export class UsersService {
   ) {}
   // -- create user
    async createUser(createUserInput: CreateUserInput) {
+    try{
     const { name, lastname, birthdate, nickname, email, password } = createUserInput;
     const [user] = await this.db.insert(schema.users).values({
       name,
@@ -44,6 +45,12 @@ export class UsersService {
     }).returning();
     this.logger.log(`User created: ${user.id}`);
     return user;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error creating user: ${error.message}`);
+      }
+      throw error; 
+    } 
    }
 
    // --hash password
@@ -71,6 +78,7 @@ export class UsersService {
   }
   // -- start user
   async startUser(startUserInput: StartUserInput) {
+    try{
     const { email, password } = startUserInput;
     const [user] = await this.db
     .select()
@@ -93,6 +101,12 @@ export class UsersService {
       nickname: user.nickname
     };
     return this.createUserToken(userSafe);
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error starting user: ${error.message}`);
+      }
+      throw error; 
+    }
     
   }
 
@@ -127,6 +141,7 @@ export class UsersService {
   }
 
   async deleteMe(idToDelete: string): Promise<String> {
+    try{
     this.logger.log(`Attempting to delete user: ${idToDelete}`);
     const result = await this.db
       .delete(schema.users)
@@ -139,6 +154,14 @@ export class UsersService {
 
     this.logger.log(`User deleted: ${idToDelete}`);
     return "User deleted successfully";
+  } catch (error) {    if (error instanceof Error) {
+      this.logger.error(`Error deleting user ${idToDelete}: ${error.message}`);
+      this.logger.error(`Stack: ${error.stack}`);
+    } else {
+      this.logger.error(`Error deleting user ${idToDelete}: ${String(error)}`);
+    }
+    throw new InternalServerErrorException('Error al eliminar usuario');
   }
     // Daniel Useche
+  }
 }
