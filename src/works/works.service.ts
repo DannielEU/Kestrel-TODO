@@ -15,6 +15,7 @@ logger = new Logger(WorksService.name);
   ) {}
 
   async create(createWorkInput: CreateWorkInput, userId: string) {
+    try{
     this.logger.log(`Creating work with input: ${JSON.stringify(createWorkInput)}`);
     const { state, description, level, projectId } = createWorkInput;
     const work = await this.db.insert(schema.works).values({
@@ -30,6 +31,12 @@ logger = new Logger(WorksService.name);
       workId: work[0].id,
     });
     return work[0];
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error creating work: ${error.message}`);
+      }
+      throw error; 
+    }
   }
 
   findAll() {
