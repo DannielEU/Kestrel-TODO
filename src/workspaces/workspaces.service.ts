@@ -70,7 +70,7 @@ export class WorkspacesService {
 
   // pendiente por probar
 
-  findOne(id: number, userId:string ) {
+  findOne(id: string, userId:string ) {
     this.logger.log(`Fetching workspace with id ${id} for user ${userId}`);
     return this.db
       .select({

@@ -23,8 +23,8 @@ export class WorkspacesResolver {
   }
 
   @UseGuards(PasetoGuard)
-  @Query(() => Workspace, { name: 'findOneWorkspace' })
-  findOne(@Args('id', { type: () => Int }) id: number, @Context() context: { req: { user: { sub: string } } }) {
+  @Query(() => WorkspaceUser, { name: 'findOneWorkspace' })
+  findOne(@Args('id', { type: () => String }) id: string, @Context() context: { req: { user: { sub: string } } }) {
     return this.workspacesService.findOne(id, context.req.user.sub);
   }
 
