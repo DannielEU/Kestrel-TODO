@@ -80,7 +80,8 @@ type Project {
 type Query {
   hello: String!
   works: [Work!]!
-  findAll: [WorkspaceUser!]!
+  findAllWorkspaces: [WorkspaceUser!]!
+  findOneWorkspace(id: Int!): Workspace!
   projects(workspaceId: String!): [Project!]!
 }
 

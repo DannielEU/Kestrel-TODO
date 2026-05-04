@@ -11,15 +11,21 @@ export class WorkspacesResolver {
   constructor(private readonly workspacesService: WorkspacesService) {}
   
   @UseGuards(PasetoGuard)
-  @Mutation(() => Workspace)
+  @Mutation(() => Workspace, { name: 'createWorkspace' })
   createWorkspace(@Args('createWorkspaceInput') createWorkspaceInput: CreateWorkspaceInput, @Context() context: { req: { user: { sub: string } } }) {
     return this.workspacesService.create(createWorkspaceInput, context.req.user.sub);
   }
 
   @UseGuards(PasetoGuard)
-  @Query(() => [WorkspaceUser])
+  @Query(() => [WorkspaceUser], { name: 'findAllWorkspaces' })
   findAll(@Context() context: { req: { user: { sub: string } } }) {
     return this.workspacesService.findAll(context.req.user.sub);
+  }
+
+  @UseGuards(PasetoGuard)
+  @Query(() => Workspace, { name: 'findOneWorkspace' })
+  findOne(@Args('id', { type: () => Int }) id: number, @Context() context: { req: { user: { sub: string } } }) {
+    return this.workspacesService.findOne(id, context.req.user.sub);
   }
 
 }

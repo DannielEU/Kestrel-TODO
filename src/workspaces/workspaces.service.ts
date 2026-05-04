@@ -67,8 +67,36 @@ export class WorkspacesService {
   return workspacesuser;
 }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workspace`;
+
+  // pendiente por probar
+
+  findOne(id: number, userId:string ) {
+    this.logger.log(`Fetching workspace with id ${id} for user ${userId}`);
+    return this.db
+      .select({
+        id: schema.workspaces.id,
+        name: schema.workspaces.name,
+        createdAt: schema.workspaces.createdAt,
+        role: schema.workspaceUsers.role,
+        updatedAt: schema.workspaces.updatedAt,
+      })
+      .from(schema.workspaces)
+      .innerJoin(
+        schema.workspaceUsers,
+        eq(schema.workspaces.id, schema.workspaceUsers.workspaceId)
+      )
+      .where( 
+        eq(schema.workspaces.id, schema.workspaceUsers.workspaceId) &&
+        eq(schema.workspaceUsers.userId, userId)
+      )
+      .then(results => {
+        if (results.length === 0) {
+          this.logger.warn(`Workspace with id ${id} not found for user ${userId}`);
+          return null; 
+        }
+        this.logger.log(`Workspace with id ${id} found for user ${userId}`);
+        return results[0]; 
+      });
   }
 
   remove(id: number) {
