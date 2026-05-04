@@ -47,6 +47,7 @@ export class WorkspacesService {
 
 
  async findAll(userId: string) {
+  try{
   const workspacesuser = await this.db
   .select({
     id: schema.workspaces.id,
@@ -65,14 +66,19 @@ export class WorkspacesService {
   this.logger.log(`Fetched workspaces for user ${userId}: ${workspacesuser.length} found`);
 
   return workspacesuser;
+  } catch (error) {
+    if (error instanceof Error) {
+      this.logger.error(`Error fetching workspaces for user ${userId}: ${error.message}`);
+    }
+    throw error; 
+  }
 }
 
 
-  // pendiente por probar
-
-  findOne(id: string, userId:string ) {
+  async findOne(id: string, userId:string ) {
+    try {
     this.logger.log(`Fetching workspace with id ${id} for user ${userId}`);
-    return this.db
+    return await this.db
       .select({
         id: schema.workspaces.id,
         name: schema.workspaces.name,
@@ -97,9 +103,46 @@ export class WorkspacesService {
         this.logger.log(`Workspace with id ${id} found for user ${userId}`);
         return results[0]; 
       });
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`Error fetching workspace with id ${id} for user ${userId}: ${error.message}`);
+      }
+      throw error; 
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workspace`;
+
+  async remove(id: string, userId: string) {
+    try{
+      this.logger.log(`Attempting to remove workspace with id ${id} for user ${userId}`);
+      const remove = await this.db.delete(schema.workspaces)
+        .where(
+          eq(schema.workspaces.id, id))
+      const removeWorkspaceUsers = await this.db.delete(schema.workspaceUsers)
+        .where(
+          eq(schema.workspaceUsers.workspaceId, id)) &&
+          eq(schema.workspaceUsers.userId, userId);
+
+      if (remove.rowCount === 0) {
+        this.logger.warn(`No workspace with id ${id} found to remove for user ${userId}`);
+        return { success: false, message: 'Workspace not found' };
+      }
+
+      return Promise.all([remove, removeWorkspaceUsers])
+        .then(() => {
+          this.logger.log(`Workspace with id ${id} removed for user ${userId}`);
+          return { success: true };
+        })
+        .catch(error => {
+          this.logger.error(`Error removing workspace with id ${id} for user ${userId}: ${error.message}`);
+          throw error;
+        });
+      } catch (error) {
+        if (error instanceof Error) {
+          this.logger.error(`Error in remove method for workspace with id ${id} for user ${userId}: ${error.message}`);
+        }
+        throw error; 
+      }
+      
   }
 }
