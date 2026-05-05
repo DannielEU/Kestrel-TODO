@@ -4,6 +4,7 @@ import { Work } from './entities/work.entity';
 import { CreateWorkInput } from './dto/create-work.input';
 import { PasetoGuard } from 'src/auth/guard/paseto.guard';
 import { UseGuards } from '@nestjs/common';
+import { WorksUsers } from './dto/worksUsers.dto';
 
 @Resolver(() => Work)
 export class WorksResolver {
@@ -13,9 +14,10 @@ export class WorksResolver {
   createWork(@Args('createWorkInput') createWorkInput: CreateWorkInput, @Context() context: { req: { user: { sub: string } } }) {
     return this.worksService.create(createWorkInput, context.req.user.sub);
   }
-
-  @Query(() => [Work], { name: 'works' })
-  findAll() {
-    return this.worksService.findAll();
+  @UseGuards(PasetoGuard)
+  @Query(() => [WorksUsers], { name: 'works' })
+  findAll(@Context() context: { req: { user: { sub: string } } }
+  ) {
+    return this.worksService.findAll(context.req.user.sub);
   }
 }

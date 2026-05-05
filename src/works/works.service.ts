@@ -3,6 +3,7 @@ import { CreateWorkInput } from './dto/create-work.input';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../database/schema';
 import { DRIZZLE } from 'src/database/drizzle.provider';
+import { eq } from 'drizzle-orm';
 
 type DB = NodePgDatabase<typeof schema>;
 
@@ -39,7 +40,51 @@ logger = new Logger(WorksService.name);
     }
   }
 
-  findAll() {
-    return `This action returns all works`;
+async findAll(userId: string) {
+  try {
+    this.logger.log(`Fetching works for user ID: ${userId}`);
+
+    const worksuser = await this.db
+      .select({
+        id: schema.works.id,
+        state: schema.works.state,
+        description: schema.works.description,
+        level: schema.works.level,
+        projectId: schema.works.projectId,
+        createdAt: schema.works.createdAt,
+        updatedAt: schema.works.updatedAt,
+        name: schema.users.name,
+        projectName: schema.projects.name,
+        workspaceName: schema.workspaces.name,
+      })
+      .from(schema.workUsers)
+      .innerJoin(
+        schema.works,
+        eq(schema.workUsers.workId, schema.works.id)
+      )
+      .innerJoin(
+        schema.users,
+        eq(schema.workUsers.userId, schema.users.id)
+      )
+      .innerJoin(
+        schema.projects,
+        eq(schema.works.projectId, schema.projects.id)
+      )
+      .innerJoin(
+        schema.workspaces
+      , eq(schema.projects.workspaceId, schema.workspaces.id)
+      )
+      .where(eq(schema.workUsers.userId, userId));
+
+    return worksuser;
+
+  } catch (error) {
+    if (error instanceof Error) {
+      this.logger.error(
+        `Error fetching works for user ${userId}: ${error.message}`
+      );
+    }
+    throw error;
   }
+}
 }

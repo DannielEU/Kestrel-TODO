@@ -52,6 +52,19 @@ enum Level {
   High
 }
 
+type WorksUsers {
+  id: ID!
+  name: String!
+  state: String!
+  description: String!
+  level: String!
+  projectId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  projectName: String!
+  workspaceName: String!
+}
+
 type Workspace {
   id: ID!
   name: String!
@@ -79,7 +92,7 @@ type Project {
 
 type Query {
   hello: String!
-  works: [Work!]!
+  works: [WorksUsers!]!
   findAllWorkspaces: [WorkspaceUser!]!
   findOneWorkspace(id: String!): WorkspaceUser!
   projects(workspaceId: String!): [Project!]!
