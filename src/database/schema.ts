@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   date,
+  integer,
   pgEnum,
   uniqueIndex,
   index,
@@ -80,14 +81,9 @@ export const workspaceUsers = pgTable(
     createdAt: timestamp('created_at').defaultNow(),
   },
   (table) => ({
-    uniqueUserWorkspace: uniqueIndex('workspace_user_unique').on(
-      table.userId,
-      table.workspaceId,
-    ),
+    uniqueUserWorkspace: uniqueIndex('workspace_user_unique').on(table.userId, table.workspaceId),
     userIdx: index('workspace_user_user_idx').on(table.userId),
-    workspaceIdx: index('workspace_user_workspace_idx').on(
-      table.workspaceId,
-    ),
+    workspaceIdx: index('workspace_user_workspace_idx').on(table.workspaceId),
   }),
 );
 
@@ -95,10 +91,13 @@ export const works = pgTable(
   'work',
   {
     id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 255 }),
     state: stateEnum('state'),
     description: text('description'),
     level: levelEnum('level'),
     projectId: uuid('project_id').references(() => projects.id),
+    timeEstimate: varchar('time_estimate', { length: 50 }),
+    points: integer('points'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -116,12 +115,45 @@ export const workUsers = pgTable(
     assignedAt: timestamp('assigned_at').defaultNow(),
   },
   (table) => ({
-    uniqueWorkUser: uniqueIndex('work_user_unique').on(
-      table.workId,
-      table.userId,
-    ),
+    uniqueWorkUser: uniqueIndex('work_user_unique').on(table.workId, table.userId),
     workIdx: index('work_user_work_idx').on(table.workId),
     userIdx: index('work_user_user_idx').on(table.userId),
+  }),
+);
+
+export const tags = pgTable('tag', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 50 }).notNull(),
+  color: varchar('color', { length: 20 }).notNull(),
+  workspaceId: uuid('workspace_id').references(() => workspaces.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const workTags = pgTable(
+  'work_tag',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workId: uuid('work_id').references(() => works.id, { onDelete: 'cascade' }),
+    tagId: uuid('tag_id').references(() => tags.id, { onDelete: 'cascade' }),
+  },
+  (table) => ({
+    uniqueWorkTag: uniqueIndex('work_tag_unique').on(table.workId, table.tagId),
+    workIdx: index('work_tag_work_idx').on(table.workId),
+  }),
+);
+
+export const workComments = pgTable(
+  'comment',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workId: uuid('work_id').references(() => works.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (table) => ({
+    workIdx: index('comment_work_idx').on(table.workId),
+    userIdx: index('comment_user_idx').on(table.userId),
   }),
 );
 

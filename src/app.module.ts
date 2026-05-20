@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MercuriusDriverConfig } from '@nestjs/mercurius';
@@ -11,13 +10,13 @@ import { PasetoModule } from './auth/paseto/paseto.module';
 import { WorksModule } from './works/works.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ProjectsModule } from './projects/projects.module';
+import { HistoryModule } from './history/history.module';
+import { TagsModule } from './tags/tags.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: join(__dirname, '..', '.env'),
-    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: join(__dirname, '..', '.env') }),
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -30,7 +29,9 @@ import { ProjectsModule } from './projects/projects.module';
     WorksModule,
     WorkspacesModule,
     ProjectsModule,
+    HistoryModule,
+    TagsModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}
-

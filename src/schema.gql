@@ -29,12 +29,21 @@ type LoginResponse {
   user: AuthUser!
 }
 
+type TagRef {
+  id: ID!
+  name: String!
+  color: String!
+}
+
 type Work {
   id: ID!
+  name: String!
   state: WorkState!
-  description: String!
+  description: String
   level: Level!
   projectId: ID!
+  timeEstimate: String
+  points: Int
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -52,17 +61,60 @@ enum Level {
   High
 }
 
+type AssignedUser {
+  id: ID!
+  name: String!
+  nickname: String!
+  assignedAt: DateTime!
+}
+
+type WorkWithAssignees {
+  id: ID!
+  name: String!
+  state: WorkState!
+  description: String
+  level: Level!
+  projectId: ID!
+  timeEstimate: String
+  points: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  assignees: [AssignedUser!]!
+  tags: [TagRef!]!
+}
+
 type WorksUsers {
   id: ID!
   name: String!
-  state: String!
-  description: String!
-  level: String!
+  state: WorkState!
+  description: String
+  level: Level!
   projectId: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  assignedUserName: String!
   projectName: String!
   workspaceName: String!
+}
+
+type HistoryEntry {
+  id: ID!
+  entityType: String!
+  entityId: ID!
+  userId: ID
+  action: String!
+  field: String
+  oldValue: String
+  newValue: String
+  createdAt: DateTime!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  color: String!
+  workspaceId: ID!
+  createdAt: DateTime!
 }
 
 type Workspace {
@@ -80,6 +132,32 @@ type WorkspaceUser {
   updatedAt: DateTime!
 }
 
+type WorkspaceMember {
+  id: ID!
+  name: String!
+  nickname: String!
+  email: String!
+  role: String!
+  joinedAt: DateTime!
+}
+
+type WorkspaceDetail {
+  id: ID!
+  name: String!
+  role: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  members: [WorkspaceMember!]!
+}
+
+type WorkspaceStats {
+  totalProjects: Int!
+  totalMembers: Int!
+  totalWorks: Int!
+  completedWorks: Int!
+  completionRate: Float!
+}
+
 type Project {
   id: ID!
   name: String!
@@ -90,21 +168,73 @@ type Project {
   updatedAt: DateTime!
 }
 
+type StateBreakdown {
+  pending: Int!
+  inProgress: Int!
+  completed: Int!
+  blocked: Int!
+}
+
+type ProjectStats {
+  total: Int!
+  byState: StateBreakdown!
+  avgPoints: Float
+  assigneeCount: Int!
+}
+
+type CommentAuthor {
+  id: ID!
+  name: String!
+  nickname: String!
+}
+
+type WorkComment {
+  id: ID!
+  workId: ID!
+  content: String!
+  author: CommentAuthor!
+  createdAt: DateTime!
+}
+
 type Query {
-  hello: String!
-  works: [WorksUsers!]!
+  me: User!
+  myWorks: [WorksUsers!]!
+  worksByProject(projectId: String!): [WorkWithAssignees!]!
+  history(entityId: String!, entityType: String!): [HistoryEntry!]!
+  workspaceTags(workspaceId: String!): [Tag!]!
   findAllWorkspaces: [WorkspaceUser!]!
-  findOneWorkspace(id: String!): WorkspaceUser!
+  findOneWorkspace(id: String!): WorkspaceDetail!
+  workspaceMembers(workspaceId: String!): [WorkspaceMember!]!
+  workspaceStats(workspaceId: String!): WorkspaceStats!
   projects(workspaceId: String!): [Project!]!
+  project(id: String!): Project!
+  projectStats(projectId: String!): ProjectStats!
+  workComments(workId: String!): [WorkComment!]!
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
   startUser(startUserInput: StartUserInput!): LoginResponse!
+  updateMe(updateMeInput: UpdateMeInput!): User!
   deleteMe: String!
   createWork(createWorkInput: CreateWorkInput!): Work!
+  updateWork(id: String!, updateWorkInput: UpdateWorkInput!): Work!
+  deleteWork(id: String!): Boolean!
+  assignUserToWork(workId: String!, userId: String!): Boolean!
+  unassignUserFromWork(workId: String!, userId: String!): Boolean!
+  createTag(createTagInput: CreateTagInput!): Tag!
+  deleteTag(id: String!): Boolean!
+  addTagToWork(workId: String!, tagId: String!): Boolean!
+  removeTagFromWork(workId: String!, tagId: String!): Boolean!
   createWorkspace(createWorkspaceInput: CreateWorkspaceInput!): Workspace!
+  updateWorkspace(id: String!, name: String!): Workspace!
+  deleteWorkspace(id: String!): Boolean!
+  addUserToWorkspace(addMemberInput: AddMemberInput!): Boolean!
+  removeUserFromWorkspace(workspaceId: String!, userId: String!): Boolean!
   createProject(createProjectInput: CreateProjectInput!): Project!
+  updateProject(id: String!, updateProjectInput: UpdateProjectInput!): Project!
+  deleteProject(id: String!): Boolean!
+  createComment(createCommentInput: CreateCommentInput!): WorkComment!
 }
 
 input CreateUserInput {
@@ -113,7 +243,7 @@ input CreateUserInput {
   email: String!
   password: String!
   lastname: String!
-  birthdate: String!
+  birthdate: String
 }
 
 input StartUserInput {
@@ -121,19 +251,58 @@ input StartUserInput {
   password: String!
 }
 
+input UpdateMeInput {
+  name: String
+  lastname: String
+  nickname: String
+}
+
 input CreateWorkInput {
+  name: String!
   state: WorkState! = PENDING
-  description: String!
-  level: Level! = Low
+  description: String
+  level: Level! = Medium
   projectId: ID!
+  timeEstimate: String
+  points: Int
+}
+
+input UpdateWorkInput {
+  name: String
+  state: WorkState
+  description: String
+  level: Level
+  timeEstimate: String
+  points: Int
+}
+
+input CreateTagInput {
+  name: String!
+  color: String!
+  workspaceId: ID!
 }
 
 input CreateWorkspaceInput {
   name: String!
 }
 
+input AddMemberInput {
+  workspaceId: ID!
+  email: String!
+}
+
 input CreateProjectInput {
   name: String!
-  description: String!
+  description: String
   workspaceId: ID!
+}
+
+input UpdateProjectInput {
+  name: String
+  description: String
+}
+
+input CreateCommentInput {
+  workId: ID!
+  content: String!
 }

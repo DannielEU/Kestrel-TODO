@@ -7,8 +7,8 @@ export class CreateProjectInput {
   @Field(() => String)
   name!: string;
 
-  @Field(() => String)
-  description!: string;
+  @Field(() => String, { nullable: true })
+  description?: string;
   
   @Field(() => ID)
   workspaceId!: string;

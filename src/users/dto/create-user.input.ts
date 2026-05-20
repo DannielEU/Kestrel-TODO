@@ -19,6 +19,6 @@ export class CreateUserInput {
   @Field(() => String)
   lastname!: string;
 
-  @Field(() => String)
-  birthdate!: string;
+  @Field(() => String, { nullable: true })
+  birthdate?: string;
 }

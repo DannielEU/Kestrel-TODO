@@ -1,25 +1,29 @@
-import { ObjectType , Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { WorkState } from 'src/public/enums/workstate.enum';
+import { Level } from 'src/public/enums/level.enum';
 
 @ObjectType()
 export class WorksUsers {
   @Field(() => ID)
-  id: string;
+  id!: string;
   @Field(() => String)
-  name: string;
+  name!: string;
+  @Field(() => WorkState)
+  state!: WorkState;
+  @Field(() => String, { nullable: true })
+  description!: string | null;
+  @Field(() => Level)
+  level!: Level;
   @Field(() => String)
-  state: string;
-  @Field(() => String)
-  description: string;
-  @Field(() => String)
-  level: string;
-  @Field(() => String)
-  projectId: string;
+  projectId!: string;
   @Field(() => Date)
-  createdAt: Date;
+  createdAt!: Date;
   @Field(() => Date)
-  updatedAt: Date;
+  updatedAt!: Date;
   @Field(() => String)
-  projectName: string;
+  assignedUserName!: string;
   @Field(() => String)
-  workspaceName: string;
+  projectName!: string;
+  @Field(() => String)
+  workspaceName!: string;
 }
